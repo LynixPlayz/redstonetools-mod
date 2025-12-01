@@ -2,6 +2,7 @@ package tools.redstone.redstonetools.malilib;
 
 import fi.dy.masa.malilib.config.IConfigBoolean;
 import fi.dy.masa.malilib.config.options.ConfigBoolean;
+import fi.dy.masa.malilib.event.InputEventHandler;
 import fi.dy.masa.malilib.gui.GuiBase;
 import fi.dy.masa.malilib.gui.GuiKeybindSettings;
 import fi.dy.masa.malilib.gui.button.ConfigButtonBoolean;
@@ -278,6 +279,7 @@ public class GuiMacroEditor extends Screen {
 		this.macro.muted = this.configBoolean2.getBooleanValue();
 		this.macro.setName(this.nameWidget.getText());
 		MacroManager.saveChanges();
+		InputEventHandler.getKeybindManager().updateUsedKeys();
 		assert client != null;
 		parent.initGui();
 		GuiBase.openGui(parent);
