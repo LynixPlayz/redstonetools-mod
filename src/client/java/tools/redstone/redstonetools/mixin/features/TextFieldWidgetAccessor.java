@@ -4,8 +4,13 @@ import net.minecraft.client.gui.widget.TextFieldWidget;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
+import java.util.List;
+
 @Mixin(TextFieldWidget.class)
-public interface TextFieldAccessor {
+public interface TextFieldWidgetAccessor {
 	@Accessor(value = "text")
-	void setText2(String s);
+	void setTextDirectly(String s);
+
+	@Accessor
+	List<TextFieldWidget.Formatter> getFormatters();
 }

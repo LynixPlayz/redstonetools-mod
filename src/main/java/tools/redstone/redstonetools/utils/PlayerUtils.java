@@ -1,7 +1,6 @@
 package tools.redstone.redstonetools.utils;
 
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.world.World;
 
 public class PlayerUtils {

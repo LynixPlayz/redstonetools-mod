@@ -3,7 +3,7 @@ package tools.redstone.redstonetools.malilib.config;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
-import net.minecraft.client.MinecraftClient;
+import net.fabricmc.loader.api.FabricLoader;
 import tools.redstone.redstonetools.macros.actions.CommandAction;
 import tools.redstone.redstonetools.malilib.widget.macro.MacroBase;
 
@@ -22,8 +22,7 @@ import java.util.UUID;
 public class MacroManager {
 	private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 	public static boolean shouldMute;
-	private static final Path MACROS_FILE_PATH = MinecraftClient.getInstance().runDirectory.toPath()
-		.resolve("config")
+	private static final Path MACROS_FILE_PATH = FabricLoader.getInstance().getConfigDir()
 		.resolve("redstonetools")
 		.resolve("macros.json");
 	private static List<MacroBase> macros = new ArrayList<>();

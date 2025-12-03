@@ -30,10 +30,12 @@ public class ColoredFeature extends PickBlockFeature {
 
 	public static ColoredBlockType blockType;
 
+	@Override
 	protected boolean requiresBlock() {
 		return false;
 	}
 
+	@Override
 	protected ItemStack getItemStack(CommandContext<ServerCommandSource> context, @Nullable BlockInfo blockInfo) {
 		var color = blockInfo == null
 				? BlockColor.WHITE

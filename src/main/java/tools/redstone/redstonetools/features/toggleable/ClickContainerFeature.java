@@ -2,6 +2,7 @@ package tools.redstone.redstonetools.features.toggleable;
 
 import com.mojang.brigadier.CommandDispatcher;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.command.CommandRegistryAccess;
@@ -16,6 +17,7 @@ import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import tools.redstone.redstonetools.RedstoneTools;
 
 import static net.minecraft.server.command.CommandManager.literal;
 
@@ -34,8 +36,7 @@ public class ClickContainerFeature extends ToggleableFeature {
 			if (!ClickContainerFeature.INSTANCE.isEnabled((ServerPlayerEntity) player)) return ActionResult.PASS;
 
 			ItemStack stack = player.getStackInHand(hand);
-			if (!stack.isEmpty() ||
-			stack.getItem() instanceof BlockItem) return ActionResult.PASS;
+			if (!stack.isEmpty() || stack.getItem() instanceof BlockItem) return ActionResult.PASS;
 
 			BlockPos pos = hitResult.getBlockPos();
 			BlockState state = world.getBlockState(pos);
@@ -67,13 +68,13 @@ public class ClickContainerFeature extends ToggleableFeature {
 		});
 	}
 
-	public static void handleIntLevelProperty(World world, BlockPos pos, BlockState state, IntProperty prop, net.minecraft.block.Block resetBlock, ServerPlayerEntity player) {
+	public static void handleIntLevelProperty(World world, BlockPos pos, BlockState state, IntProperty prop, Block resetBlock, ServerPlayerEntity player) {
 		if (prop == null) return;
 		Integer current;
 		try {
 			current = state.get(prop);
 		} catch (Exception e) {
-			System.err.println("[ClickContainerFeature] Failed to read property " + prop.getName() + " for block " + state.getBlock() + " at " + pos + ": " + e);
+			RedstoneTools.LOGGER.error("[ClickContainerFeature] Failed to read property " + prop.getName() + " for block " + state.getBlock() + " at " + pos + ": " + e);
 			return;
 		}
 		if (current == null) return;
@@ -92,7 +93,7 @@ public class ClickContainerFeature extends ToggleableFeature {
 	}
 
 	public void registerCommand(CommandDispatcher<ServerCommandSource> dispatcher, CommandRegistryAccess registryAccess, CommandManager.RegistrationEnvironment registrationEnvironment) {
-			dispatcher.register(literal("clickcontainers").executes(this::toggle));
+		dispatcher.register(literal("clickcontainers").executes(this::toggle));
 	}
 
 	@Override
