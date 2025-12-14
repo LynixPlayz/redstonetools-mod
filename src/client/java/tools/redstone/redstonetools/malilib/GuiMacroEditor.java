@@ -168,13 +168,13 @@ public class GuiMacroEditor extends Screen {
 		if (buttonKeybind.onMouseClicked(/*$ on_mouse_clicked_args {*/click, doubleClick/*$}*/) ||
 			buttonEnabled.onMouseClicked(/*$ on_mouse_clicked_args {*/click, doubleClick/*$}*/) ||
 			buttonMuted.onMouseClicked(/*$ on_mouse_clicked_args {*/click, doubleClick/*$}*/) ||
-			widgetAdvancedKeybindSettings.onMouseClicked(/*$ on_mouse_clicked_args {*/click, doubleClick/*$}*/)) {
+			widgetAdvancedKeybindSettings.onMouseClicked(/*$ on_mouse_clicked_args {*/click, doubleClick/*$}*/) ||
+			commandList.mouseClicked(/*$ mouse_clicked_args {*/click, doubleClick/*$}*/)) {
 			if (this.getFocused() != null) {
 				this.getFocused().setFocused(false);
 			}
 			return true;
 		}
-		if (commandList.mouseClicked(/*$ mouse_clicked_args {*/click, doubleClick/*$}*/)) return true;
 		return super.mouseClicked(/*$ mouse_clicked_args {*/click, doubleClick/*$}*/);
 	}
 
