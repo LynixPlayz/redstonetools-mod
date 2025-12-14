@@ -52,6 +52,7 @@ public class CommandListWidget extends EntryListWidget<CommandListWidget.Command
 			this.commandSuggester = null;
 			return;
 		}
+		//? if >=1.21.10
 		((TextFieldWidgetAccessor) entry.commandWidget).getFormatters().clear();
 		this.commandSuggester = new ChatInputSuggestor(
 			client,
@@ -74,10 +75,18 @@ public class CommandListWidget extends EntryListWidget<CommandListWidget.Command
 
 			@Override
 			public void renderMessages(DrawContext context) {
+				//? if >=1.21.8 {
 				context.getMatrices().pushMatrix();
-				context.getMatrices().translate(0, entry.commandWidget.getY() + 20 - 72);
+				//?} else
+				/*context.getMatrices().push();*/
+				var x = 0;
+				var y = entry.commandWidget.getY() + 20 - 72;
+				context.getMatrices().translate(x, y/*? if <1.21.8 {*//*, 0*//*?}*/);
 				super.renderMessages(context);
+				//? if >=1.21.8 {
 				context.getMatrices().popMatrix();
+				//?} else
+				/*context.getMatrices().pop();*/
 			}
 		};
 		this.commandSuggester.setWindowActive(true);
@@ -121,10 +130,12 @@ public class CommandListWidget extends EntryListWidget<CommandListWidget.Command
 		}
 	}
 
+	//? if >=1.21.10 {
 	@Override
 	protected boolean isEntrySelectionAllowed() {
 		return false;
 	}
+	//?}
 
 	@Override
 	public int getRowWidth() {
@@ -153,6 +164,7 @@ public class CommandListWidget extends EntryListWidget<CommandListWidget.Command
 
 	}
 
+	@SuppressWarnings("RedundantIfStatement")
 	public class CommandEntry extends Entry<CommandEntry> {
 		public final CommandAction command;
 		private TextFieldWidget commandWidget;
@@ -184,13 +196,16 @@ public class CommandListWidget extends EntryListWidget<CommandListWidget.Command
 		}
 
 		@Override
-		public void render(DrawContext context, /*? if <1.21.10 {*/ /*int index, int y, int x, int entryWidth, int entryHeight, *//*?}*/ int mouseX, int mouseY, boolean hovered, float tickProgress) {
-			this.commandWidget.setX(this.getX() + 4);
-			this.commandWidget.setY(this.getY() + 3);
+		public void render(DrawContext context, /*? if <1.21.10 {*/ /*int index, int argY, int argX, int entryWidth, int entryHeight, *//*?}*/ int mouseX, int mouseY, boolean hovered, float tickProgress) {
+			int x = /*? if <1.21.10 {*//*argX*//*?} else {*/this.getX()/*?}*/;
+			int y = /*? if <1.21.10 {*//*argY*//*?} else {*/this.getY()/*?}*/;
+			int width = /*? if <1.21.10 {*//*entryWidth*//*?} else {*/this.getWidth()/*?}*/;
+			this.commandWidget.setX(x + 4);
+			this.commandWidget.setY(y + 3);
 			commandWidget.render(context, mouseX, mouseY, tickProgress);
 
-			this.removeButton.setY(this.getY() + 6);
-			this.removeButton.setX(this.getX() + this.getWidth() - this.removeButton.getWidth() - 10);
+			this.removeButton.setX(x + width - this.removeButton.getWidth() - 10);
+			this.removeButton.setY(y + 6);
 			//? if <=1.21.5 {
 			/*removeButton.render(mouseX, mouseY, removeButton.isMouseOver(), context);
 			*///?} else {
@@ -230,7 +245,9 @@ public class CommandListWidget extends EntryListWidget<CommandListWidget.Command
 		@Override
 		public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
 			if (commandWidget.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount)) return true;
-			if (removeButton.onMouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount)) return true;
+			var x = /*? if <1.21.10 {*//*(int)*//*?}*/mouseX;
+			var y = /*? if <1.21.10 {*//*(int)*//*?}*/mouseY;
+			if (removeButton.onMouseScrolled(x, y, horizontalAmount, verticalAmount)) return true;
 			return false;
 		}
 
