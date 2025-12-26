@@ -50,7 +50,11 @@ public class GuiMacroManager extends GuiListBase<MacroBase, WidgetMacroEntry, Wi
 
 		super.initGui();
 
-		this.clearWidgets();
+		//? if <=1.21.10 {
+		/*this.clearWidgets();
+		*///?} else {
+		this.clearChildren();
+		//?}
 		this.clearButtons();
 		this.createTabButtons();
 		this.getListWidget().refreshEntries();

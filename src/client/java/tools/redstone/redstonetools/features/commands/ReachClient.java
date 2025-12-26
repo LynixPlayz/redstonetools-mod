@@ -8,6 +8,7 @@ import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.entity.attribute.EntityAttributes;
+import tools.redstone.redstonetools.ClientCommands;
 
 
 public class ReachClient {
@@ -18,7 +19,7 @@ public class ReachClient {
 
 	public void registerCommand(CommandDispatcher<FabricClientCommandSource> dispatcher, CommandRegistryAccess registryAccess) {
 			dispatcher.register(ClientCommandManager.literal("reach")
-				.requires(source -> source.getPlayer().hasPermissionLevel(2))
+				.requires(ClientCommands.PERMISSION_LEVEL_2)
 				.then(ClientCommandManager.argument("reach", FloatArgumentType.floatArg(0.0f))
 					.executes(context -> execute(context, true, true))
 				)

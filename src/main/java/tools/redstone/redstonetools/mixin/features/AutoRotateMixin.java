@@ -7,11 +7,11 @@ import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.util.BlockRotation;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import tools.redstone.redstonetools.features.toggleable.AutoRotateFeature;
-import tools.redstone.redstonetools.utils.BlockUtils;
 
 @Mixin(BlockItem.class)
 public abstract class AutoRotateMixin {
@@ -32,7 +32,7 @@ public abstract class AutoRotateMixin {
 		if (original == null)                                                    return null;
 
 		BlockState backup = original;
-		original = BlockUtils.rotate(original);
+		original = original.rotate(BlockRotation.CLOCKWISE_180);
 
 		if (this.canPlace(context, original))
 			return original;

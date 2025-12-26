@@ -2,6 +2,9 @@ package tools.redstone.redstonetools.malilib.widget.action;
 
 import fi.dy.masa.malilib.gui.button.ButtonBase;
 import fi.dy.masa.malilib.gui.button.ButtonGeneric;
+//? if >=1.21.11 {
+import fi.dy.masa.malilib.render.GuiContext;
+//?}
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.ChatInputSuggestor;
@@ -164,7 +167,6 @@ public class CommandListWidget extends EntryListWidget<CommandListWidget.Command
 
 	}
 
-	@SuppressWarnings("RedundantIfStatement")
 	public class CommandEntry extends Entry<CommandEntry> {
 		public final CommandAction command;
 		private TextFieldWidget commandWidget;
@@ -208,8 +210,10 @@ public class CommandListWidget extends EntryListWidget<CommandListWidget.Command
 			this.removeButton.setY(y + 6);
 			//? if <=1.21.5 {
 			/*removeButton.render(mouseX, mouseY, removeButton.isMouseOver(), context);
+			*///?} else if <=1.21.10 {
+			/*removeButton.render(context, mouseX, mouseY, removeButton.isMouseOver());
 			*///?} else {
-			removeButton.render(context, mouseX, mouseY, removeButton.isMouseOver());
+			removeButton.render(GuiContext.fromGuiGraphics(context), mouseX, mouseY, removeButton.isMouseOver());
 			//?}
 		}
 

@@ -1,11 +1,26 @@
 package tools.redstone.redstonetools;
 
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
+//? if >=1.21.11 {
+import net.minecraft.command.DefaultPermissions;
+import net.minecraft.command.permission.PermissionCheck;
+import net.minecraft.server.command.CommandManager;
+//?}
+import net.minecraft.server.command.ServerCommandSource;
 import tools.redstone.redstonetools.features.commands.*;
 import tools.redstone.redstonetools.features.toggleable.*;
 import tools.redstone.redstonetools.utils.DependencyLookup;
 
+import java.util.function.Predicate;
+
 public class Commands {
+	public static final Predicate<ServerCommandSource> PERMISSION_LEVEL_2 =
+		//? if <=1.21.10 {
+		/*source -> source.hasPermissionLevel(2);
+		*///?} else {
+		CommandManager.requirePermissionLevel(new PermissionCheck.Require(DefaultPermissions.GAMEMASTERS));
+		//?}
+
 	public static void registerCommands() {
 		CommandRegistrationCallback.EVENT.register((commandDispatcher, commandRegistryAccess, registrationEnvironment) -> {
 			if (DependencyLookup.WORLDEDIT_PRESENT) {

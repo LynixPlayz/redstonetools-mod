@@ -8,12 +8,14 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.network.packet.s2c.play.EntityVelocityUpdateS2CPacket;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.Vec3d;
+import tools.redstone.redstonetools.Commands;
 import tools.redstone.redstonetools.utils.PositionUtils;
 import tools.redstone.redstonetools.utils.RaycastUtils;
 
@@ -31,7 +33,7 @@ public class QuickTpFeature {
 
 	public void registerCommand(CommandDispatcher<ServerCommandSource> dispatcher, CommandRegistryAccess registryAccess, CommandManager.RegistrationEnvironment registrationEnvironment) {
 			dispatcher.register(literal("quicktp")
-				.requires(source -> source.hasPermissionLevel(2))
+				.requires(Commands.PERMISSION_LEVEL_2)
 				.executes(this::parseArguments)
 				.then(argument("distance", DoubleArgumentType.doubleArg())
 						.executes(this::parseArguments)
@@ -103,7 +105,7 @@ public class QuickTpFeature {
 			player.requestTeleport(targetPosition.x, targetPosition.y, targetPosition.z);
 			if (resetVelocity) player.setVelocity(Vec3d.ZERO);
 			player.fallDistance = 0;
-			player.velocityModified = true; // guh
+			player.networkHandler.sendPacket(new EntityVelocityUpdateS2CPacket(player));
 		} finally {
 			quicktpingForPlayer.remove(player);
 		}

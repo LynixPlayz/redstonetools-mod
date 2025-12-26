@@ -24,6 +24,7 @@ import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.Nullable;
+import tools.redstone.redstonetools.Commands;
 import tools.redstone.redstonetools.utils.ArgumentUtils;
 import tools.redstone.redstonetools.utils.DirectionArgument;
 
@@ -43,7 +44,7 @@ public class RStackFeature {
 	public void registerCommand(CommandDispatcher<ServerCommandSource> dispatcher, CommandRegistryAccess registryAccess, CommandManager.RegistrationEnvironment registrationEnvironment) {
 			dispatcher.register(
 				literal("/rstack")
-					.requires(source -> source.hasPermissionLevel(2))
+					.requires(Commands.PERMISSION_LEVEL_2)
 					.executes(getCommandForArgumentCount(0))
 					.then(argument("count", IntegerArgumentType.integer())
 						.executes(getCommandForArgumentCount(1))
