@@ -1,5 +1,12 @@
 package tools.redstone.redstonetools.malilib.widget.macro;
 
+import com.google.gson.JsonElement;
+import com.mojang.datafixers.util.Pair;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
+import com.mojang.serialization.DynamicOps;
+import com.mojang.serialization.JsonOps;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import fi.dy.masa.malilib.config.options.ConfigHotkey;
 import fi.dy.masa.malilib.event.InputEventHandler;
 import fi.dy.masa.malilib.hotkeys.KeybindSettings;
@@ -10,10 +17,33 @@ import tools.redstone.redstonetools.macros.actions.CommandAction;
 import tools.redstone.redstonetools.malilib.KeybindHandler;
 import tools.redstone.redstonetools.malilib.config.MacroManager;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class MacroBase {
+	private static final Codec<KeybindSettings> KEYBIND_SETTINGS_CODEC = new Codec<>() {
+		@Override
+		public <T> DataResult<T> encode(KeybindSettings keybindSettings, DynamicOps<T> dynamicOps, T t) {
+			return DataResult.success(JsonOps.INSTANCE.convertTo(dynamicOps, keybindSettings.toJson()));
+		}
+
+		@Override
+		public <T> DataResult<Pair<KeybindSettings, T>> decode(DynamicOps<T> dynamicOps, T t) {
+			JsonElement jsonElement = dynamicOps.convertTo(JsonOps.INSTANCE, t);
+			KeybindSettings keybindSettings1 = !jsonElement.isJsonObject() ? KeybindSettings.PRESS_ALLOWEXTRA : KeybindSettings.fromJson(jsonElement.getAsJsonObject());
+			return DataResult.success(Pair.of(keybindSettings1, dynamicOps.empty()));
+		}
+	};
+	public static final Codec<MacroBase> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+		Codec.STRING.optionalFieldOf("name", "").forGetter(macro -> macro.name),
+		Codec.STRING.optionalFieldOf("keybind", "").forGetter(macro -> macro.hotkey.getStringValue()),
+		KEYBIND_SETTINGS_CODEC.optionalFieldOf("keybindSettings", KeybindSettings.PRESS_ALLOWEXTRA).forGetter(macro -> macro.hotkey.getKeybind().getSettings()),
+		CommandAction.CODEC.listOf().optionalFieldOf("actions", List.of()).forGetter(macro -> macro.actions),
+		Codec.BOOL.optionalFieldOf("enabled", true).forGetter(macro -> macro.enabled),
+		Codec.BOOL.optionalFieldOf("muted", false).forGetter(macro -> macro.muted)
+	).apply(instance, MacroBase::new));
+
 	public ConfigHotkey hotkey;
 	public boolean muted;
 	protected String name;
@@ -21,13 +51,13 @@ public class MacroBase {
 	public KeybindHandler handler;
 	public List<CommandAction> actions;
 
-	public MacroBase(String name, String keybind, List<CommandAction> actions) {
-		this(name, keybind, actions, true, false);
+	public MacroBase(String name, String keybind, KeybindSettings keybindSettings, List<CommandAction> actions) {
+		this(name, keybind, keybindSettings, actions, true, false);
 	}
 
-	public MacroBase(String name, String keybind, List<CommandAction> actions, boolean enabled, boolean muted) {
-		this.actions = new java.util.ArrayList<>(actions);
-		this.hotkey = new ConfigHotkey("Hotkey", keybind, KeybindSettings.PRESS_ALLOWEXTRA, "Pressing this hotkey will activate the macro");
+	public MacroBase(String name, String keybind, KeybindSettings keybindSettings, List<CommandAction> actions, boolean enabled, boolean muted) {
+		this.actions = new ArrayList<>(actions);
+		this.hotkey = new ConfigHotkey("Hotkey", keybind, keybindSettings, "Pressing this hotkey will activate the macro");
 		this.hotkey.getKeybind().setCallback((t, g) -> {
 			this.run();
 			return true;

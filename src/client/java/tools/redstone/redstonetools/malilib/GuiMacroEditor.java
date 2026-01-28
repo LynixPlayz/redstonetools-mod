@@ -173,27 +173,30 @@ public class GuiMacroEditor extends Screen {
 
 	@Override
 	public boolean mouseClicked(/*$ mouse_clicked_params {*/Click click, boolean doubleClick/*$}*/) {
-		if (buttonKeybind.onMouseClicked(/*$ on_mouse_clicked_args {*/click, doubleClick/*$}*/) ||
-			buttonEnabled.onMouseClicked(/*$ on_mouse_clicked_args {*/click, doubleClick/*$}*/) ||
-			buttonMuted.onMouseClicked(/*$ on_mouse_clicked_args {*/click, doubleClick/*$}*/) ||
-			widgetAdvancedKeybindSettings.onMouseClicked(/*$ on_mouse_clicked_args {*/click, doubleClick/*$}*/) ||
-			commandList.mouseClicked(/*$ mouse_clicked_args {*/click, doubleClick/*$}*/)) {
+		if (super.mouseClicked(/*$ mouse_clicked_args {*/click, doubleClick/*$}*/)) return true;
+		boolean buttonKeybindClicked = buttonKeybind.onMouseClicked(/*$ on_mouse_clicked_args {*/click, doubleClick/*$}*/);
+		boolean buttonEnabledClicked = buttonEnabled.onMouseClicked(/*$ on_mouse_clicked_args {*/click, doubleClick/*$}*/);
+		boolean buttonMutedClicked = buttonMuted.onMouseClicked(/*$ on_mouse_clicked_args {*/click, doubleClick/*$}*/);
+		boolean widgetAdvancedKeybindSettingsClicked = widgetAdvancedKeybindSettings.onMouseClicked(/*$ on_mouse_clicked_args {*/click, doubleClick/*$}*/);
+		boolean commandListClicked = commandList.mouseClicked(/*$ mouse_clicked_args {*/click, doubleClick/*$}*/);
+		if (buttonKeybindClicked || buttonEnabledClicked || buttonMutedClicked || widgetAdvancedKeybindSettingsClicked || commandListClicked) {
 			if (this.getFocused() != null) {
-				this.getFocused().setFocused(false);
+				this.setFocused(null);
 			}
 			return true;
 		}
-		return super.mouseClicked(/*$ mouse_clicked_args {*/click, doubleClick/*$}*/);
+		return false;
 	}
 
 	@Override
 	public boolean mouseReleased(/*$ dragged_released_params {*/Click click/*$}*/) {
+		if (super.mouseReleased(/*$ dragged_released_args {*/click/*$}*/)) return true;
+		if (commandList.mouseReleased(/*$ dragged_released_args {*/click/*$}*/)) return true;
 		buttonKeybind.onMouseReleased(/*$ on_released_args {*/click/*$}*/);
 		buttonEnabled.onMouseReleased(/*$ on_released_args {*/click/*$}*/);
 		buttonMuted.onMouseReleased(/*$ on_released_args {*/click/*$}*/);
 		widgetAdvancedKeybindSettings.onMouseReleased(/*$ on_released_args {*/click/*$}*/);
-		if (commandList.mouseReleased(/*$ dragged_released_args {*/click/*$}*/)) return true;
-		return super.mouseReleased(/*$ dragged_released_args {*/click/*$}*/);
+		return false;
 	}
 
 	@Override

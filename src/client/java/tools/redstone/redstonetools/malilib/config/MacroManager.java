@@ -2,7 +2,9 @@ package tools.redstone.redstonetools.malilib.config;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.reflect.TypeToken;
+import com.google.gson.JsonElement;
+import com.mojang.serialization.JsonOps;
+import fi.dy.masa.malilib.hotkeys.KeybindSettings;
 import net.fabricmc.loader.api.FabricLoader;
 import tools.redstone.redstonetools.macros.actions.CommandAction;
 import tools.redstone.redstonetools.malilib.widget.macro.MacroBase;
@@ -10,7 +12,6 @@ import tools.redstone.redstonetools.malilib.widget.macro.MacroBase;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
-import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -31,27 +32,14 @@ public class MacroManager {
 		return macros;
 	}
 
-
-	private static final Type MACRO_LIST_TYPE = new TypeToken<List<MacroStructure>>() {
-	}.getType();
-
 	public static void saveChanges() {
-		List<MacroStructure> macroStructure = new ArrayList<>();
-		for (MacroBase macro : macros) {
-			macroStructure.add(new MacroStructure(
-				macro.getName(),
-				macro.hotkey.getKeybind().getStringValue(),
-				macro.isEnabled(),
-				macro.muted,
-				macro.actions
-			));
-		}
+		JsonElement jsonElement = MacroBase.CODEC.listOf().encodeStart(JsonOps.INSTANCE, macros).getOrThrow();
 		try {
 			if (MACROS_FILE_PATH.getParent() != null) Files.createDirectories(MACROS_FILE_PATH.getParent());
 
 			Path tmp = MACROS_FILE_PATH.resolveSibling(MACROS_FILE_PATH.getFileName().toString() + ".tmp");
 			try (BufferedWriter writer = Files.newBufferedWriter(tmp, StandardCharsets.UTF_8)) {
-				GSON.toJson(macroStructure, MACRO_LIST_TYPE, writer);
+				GSON.toJson(jsonElement, writer);
 			}
 			Files.move(tmp, MACROS_FILE_PATH, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
 		} catch (IOException ignored) {
@@ -64,22 +52,13 @@ public class MacroManager {
 			return;
 		}
 		try (BufferedReader reader = Files.newBufferedReader(MACROS_FILE_PATH, StandardCharsets.UTF_8)) {
-			List<MacroStructure> list = GSON.fromJson(reader, MACRO_LIST_TYPE);
-			if (list == null) {
+			List<MacroBase> macrosFromFile = MacroBase.CODEC.listOf().parse(JsonOps.INSTANCE, GSON.fromJson(reader, JsonElement.class)).result().orElse(null);
+			if (macrosFromFile == null) {
 				macros = getDefaultMacros();
 				return;
 			}
-			for (MacroStructure macro : list) {
-				macros.add(new MacroBase(
-					macro.name,
-					macro.key,
-					macro.actions,
-					macro.enabled,
-					macro.muted
-				));
-			}
-		} catch (
-			IOException ignored) {
+			macros.addAll(macrosFromFile);
+		} catch (IOException ignored) {
 			macros = getDefaultMacros();
 		}
 	}
@@ -134,7 +113,7 @@ public class MacroManager {
 			actions[i] = new CommandAction(commands[i]);
 		}
 
-		return new MacroBase(name, "", List.of(actions));
+		return new MacroBase(name, "", KeybindSettings.PRESS_ALLOWEXTRA, List.of(actions));
 	}
 
 	public static void removeMacro(MacroBase macro) {
@@ -148,13 +127,4 @@ public class MacroManager {
 		macros.addFirst(macroBase);
 	}
 
-	record MacroStructure(
-		String name,
-		String key,
-		boolean enabled,
-		boolean muted,
-		List<CommandAction> actions
-	) {
-
-	}
 }
