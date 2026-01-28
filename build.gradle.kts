@@ -36,14 +36,6 @@ stonecutter {
 	swaps["click_and_inputs_imports"] = if (current.parsed < "1.21.10") "" else
 		"//\nimport net.minecraft.client.gui.Click;\nimport net.minecraft.client.input.KeyInput;\nimport net.minecraft.client.input.CharInput;"
 
-	swaps["get_x"] = if (current.parsed < "1.21.10") "x" else "getX()"
-	swaps["get_y"] = if (current.parsed < "1.21.10") "y" else "getY()"
-	swaps["get_width"] = if (current.parsed < "1.21.10") "entryWidth" else "getWidth()"
-	swaps["permission_level_2"] =
-		if (current.parsed < "1.21.11")
-			"source -> source.hasPermissionLevel(2)"
-		else
-			"CommandManager.requirePermissionLevel(new PermissionCheck.Require(DefaultPermissions.GAMEMASTERS))"
 }
 
 repositories {

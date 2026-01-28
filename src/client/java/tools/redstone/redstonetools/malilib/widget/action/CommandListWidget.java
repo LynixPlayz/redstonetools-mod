@@ -7,6 +7,7 @@ import fi.dy.masa.malilib.render.GuiContext;
 //?}
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.gui.ScreenRect;
 import net.minecraft.client.gui.navigation.GuiNavigation;
 import net.minecraft.client.gui.navigation.GuiNavigationPath;
 import net.minecraft.client.gui.navigation.NavigationAxis;
@@ -240,21 +241,19 @@ public class CommandListWidget extends EntryListWidget<CommandListWidget.Command
 
 		@Override
 		public void render(DrawContext context, /*? if <1.21.10 {*/ /*int index, int argY, int argX, int entryWidth, int entryHeight, *//*?}*/ int mouseX, int mouseY, boolean hovered, float tickProgress) {
-			int x = /*? if <1.21.10 {*//*argX*//*?} else {*/this.getX()/*?}*/;
-			int y = /*? if <1.21.10 {*//*argY*//*?} else {*/this.getY()/*?}*/;
-			int width = /*? if <1.21.10 {*//*entryWidth*//*?} else {*/this.getWidth()/*?}*/;
-			this.commandWidget.setX(x + 4);
-			this.commandWidget.setY(y + 3);
 			commandWidget.render(context, mouseX, mouseY, tickProgress);
 
-			this.removeButton.setX(x + width - this.removeButton.getWidth() - 10);
-			this.removeButton.setY(y + 6);
 			//? if <=1.21.5 {
 			/*removeButton.render(mouseX, mouseY, removeButton.isMouseOver(), context);
 			*///?} else if <=1.21.10 {
 			/*removeButton.render(context, mouseX, mouseY, removeButton.isMouseOver());
 			*///?} else {
-			removeButton.render(GuiContext.fromGuiGraphics(context), mouseX, mouseY, removeButton.isMouseOver());
+			GuiContext guiContext = GuiContext.fromGuiGraphics(context);
+			ScreenRect last = context.scissorStack.peekLast();
+			if (last != null) {
+				guiContext.pushScissor(last);
+			}
+			removeButton.render(guiContext, mouseX, mouseY, removeButton.isMouseOver());
 			//?}
 		}
 
