@@ -5,6 +5,7 @@ import com.mojang.brigadier.arguments.FloatArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.command.CommandRegistryAccess;
+import tools.redstone.redstonetools.ClientCommands;
 
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.argument;
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal;
@@ -18,7 +19,7 @@ public class QuickTpClient {
 	public void registerCommand(CommandDispatcher<FabricClientCommandSource> dispatcher, CommandRegistryAccess registryAccess) {
 			dispatcher.register(
 			literal("quicktp")
-				.requires(source -> source.getPlayer().hasPermissionLevel(2))
+				.requires(ClientCommands.PERMISSION_LEVEL_2)
 				.executes(context -> this.execute(
 					context,
 					50.0f))

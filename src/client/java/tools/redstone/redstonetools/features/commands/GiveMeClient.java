@@ -7,6 +7,7 @@ import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.argument.ItemStackArgument;
 import net.minecraft.command.argument.ItemStackArgumentType;
+import tools.redstone.redstonetools.ClientCommands;
 
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal;
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.argument;
@@ -20,7 +21,7 @@ public class GiveMeClient {
 	public void registerCommand(CommandDispatcher<FabricClientCommandSource> dispatcher, CommandRegistryAccess registryAccess) {
 			dispatcher.register(
 			literal("g")
-				.requires(source -> source.getPlayer().hasPermissionLevel(2))
+				.requires(ClientCommands.PERMISSION_LEVEL_2)
 				.then(argument("item", ItemStackArgumentType.itemStack(registryAccess))
 					.executes(context -> this.execute(
 						context,

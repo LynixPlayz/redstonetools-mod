@@ -12,6 +12,7 @@ import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.state.property.Property;
 import net.minecraft.text.Text;
+import tools.redstone.redstonetools.Commands;
 import tools.redstone.redstonetools.mixin.AbstractBlockMixin;
 import tools.redstone.redstonetools.mixin.features.ServerPlayNetworkHandlerAccessor;
 import tools.redstone.redstonetools.utils.BlockInfo;
@@ -27,7 +28,7 @@ public class CopyStateFeature extends PickBlockFeature {
 	}
 
 	public void registerCommand(CommandDispatcher<ServerCommandSource> dispatcher, CommandRegistryAccess registryAccess, CommandManager.RegistrationEnvironment registrationEnvironment) {
-			dispatcher.register(CommandManager.literal("copystate").requires(source -> source.hasPermissionLevel(2)).executes(this::execute));
+		dispatcher.register(CommandManager.literal("copystate").requires(Commands.PERMISSION_LEVEL_2).executes(this::execute));
 	}
 
 	@Override

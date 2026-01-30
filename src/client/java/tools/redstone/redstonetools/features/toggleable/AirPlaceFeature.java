@@ -10,10 +10,14 @@ import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderContext;
 import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderEvents;
 import net.minecraft.client.render.state.OutlineRenderState;
 //?}
+//? if <=1.21.10 {
+/*import net.minecraft.client.render.RenderLayer;
+*///?} else {
+import net.minecraft.client.render.RenderLayers;
+//?}
 import net.minecraft.block.BlockState;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.Camera;
-import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.entity.EquipmentSlot;
@@ -21,14 +25,15 @@ import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.util.BlockRotation;
 import net.minecraft.util.Colors;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
+import tools.redstone.redstonetools.ClientCommands;
 import tools.redstone.redstonetools.malilib.config.Configs;
 import tools.redstone.redstonetools.mixin.features.WorldRendererInvoker;
-import tools.redstone.redstonetools.utils.BlockUtils;
 import tools.redstone.redstonetools.utils.ItemUtils;
 import tools.redstone.redstonetools.utils.RaycastUtils;
 
@@ -45,7 +50,7 @@ public class AirPlaceFeature extends ClientToggleableFeature {
 
 	public void registerCommand(CommandDispatcher<FabricClientCommandSource> dispatcher, CommandRegistryAccess registryAccess) {
 		dispatcher.register(literal("airplace")
-			.requires(source -> source.getPlayer().hasPermissionLevel(2))
+			.requires(ClientCommands.PERMISSION_LEVEL_2)
 			.executes(this::toggle));
 	}
 
@@ -107,16 +112,27 @@ public class AirPlaceFeature extends ClientToggleableFeature {
 
 			BlockState blockState = ItemUtils.getUseState(client.player, client.player.getMainHandStack(), reach);
 			if (AutoRotateClient.isEnabled.getBooleanValue()) {
-				blockState = BlockUtils.rotate(blockState);
+				blockState = blockState.rotate(BlockRotation.CLOCKWISE_180);
 			}
 			if (blockState == null)
 				return;
 
 			/* render block outline */
 			Camera camera = client.gameRenderer.getCamera();
-			Vec3d camPos = camera.getPos();
+			Vec3d camPos = camera
+				//? if <=1.21.10 {
+				/*.getPos();
+			    *///?} else {
+			    .getCameraPos();
+			    //?}
 
-			VertexConsumer consumer = context.consumers().getBuffer(RenderLayer.getLines());
+			VertexConsumer consumer = context.consumers().getBuffer(
+				//? if <=1.21.10 {
+				/*RenderLayer.getLines()
+				*///?} else {
+				RenderLayers.lines()
+				//?}
+			);
 
 			//? if <1.21.10 {
 			/*((WorldRendererInvoker) context.worldRenderer()).invokeDrawBlockOutline(
@@ -137,9 +153,9 @@ public class AirPlaceFeature extends ClientToggleableFeature {
 					blockPos,
 					false,
 					false,
-					blockState.getOutlineShape(MinecraftClient.getInstance().world, blockPos)
+					blockState.getOutlineShape(client.world, blockPos)
 				),
-				Colors.BLACK
+				Colors.BLACK/*? if >=1.21.11 {*/, client.getWindow().getMinimumLineWidth()/*?}*/
 			);
 			//?}
 		};

@@ -8,12 +8,16 @@ import fi.dy.masa.malilib.gui.button.IButtonActionListener;
 import fi.dy.masa.malilib.gui.widgets.WidgetListEntryBase;
 import fi.dy.masa.malilib.render.RenderUtils;
 import fi.dy.masa.malilib.util.StringUtils;
-import net.minecraft.client.gui.DrawContext;
 import net.minecraft.text.Text;
 import tools.redstone.redstonetools.malilib.GuiMacroEditor;
 import tools.redstone.redstonetools.malilib.config.MacroManager;
 //? if >=1.21.10 {
 import net.minecraft.client.gui.Click;
+//?}
+//? if <=1.21.10 {
+/*import net.minecraft.client.gui.DrawContext;
+*///?} else {
+import fi.dy.masa.malilib.render.GuiContext;
 //?}
 
 public class WidgetMacroEntry extends WidgetListEntryBase<MacroBase> {
@@ -37,7 +41,7 @@ public class WidgetMacroEntry extends WidgetListEntryBase<MacroBase> {
 
 	//? if >=1.21.8 {
 	@Override
-	public void render(DrawContext context, int mouseX, int mouseY, boolean selected) {
+	public void render(/*? if <=1.21.10 {*//*DrawContext*//*?} else {*/GuiContext/*?}*/ context, int mouseX, int mouseY, boolean selected) {
 		if (selected || this.isMouseOver(mouseX, mouseY)) {
 			RenderUtils.drawRect(context, this.x, this.y, this.width, this.height, 0x70FFFFFF);
 		} else if (this.isOdd) {
@@ -51,7 +55,7 @@ public class WidgetMacroEntry extends WidgetListEntryBase<MacroBase> {
 	}
 
 	@Override
-	public void postRenderHovered(DrawContext context, int mouseX, int mouseY, boolean selected) {
+	public void postRenderHovered(/*? if <=1.21.10 {*//*DrawContext*//*?} else {*/GuiContext/*?}*/ context, int mouseX, int mouseY, boolean selected) {
 		super.postRenderHovered(context, mouseX, mouseY, selected);
 	}
 	//?} else {

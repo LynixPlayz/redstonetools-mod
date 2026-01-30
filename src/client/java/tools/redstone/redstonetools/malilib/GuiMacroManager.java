@@ -6,6 +6,7 @@ import fi.dy.masa.malilib.gui.button.ButtonBase;
 import fi.dy.masa.malilib.gui.button.ButtonGeneric;
 import fi.dy.masa.malilib.gui.button.IButtonActionListener;
 import fi.dy.masa.malilib.gui.interfaces.ISelectionListener;
+import fi.dy.masa.malilib.hotkeys.KeybindSettings;
 import net.minecraft.client.gui.DrawContext;
 import org.jetbrains.annotations.Nullable;
 import tools.redstone.redstonetools.malilib.config.MacroManager;
@@ -50,7 +51,11 @@ public class GuiMacroManager extends GuiListBase<MacroBase, WidgetMacroEntry, Wi
 
 		super.initGui();
 
-		this.clearWidgets();
+		//? if <=1.21.10 {
+		/*this.clearWidgets();
+		*///?} else {
+		this.clearChildren();
+		//?}
 		this.clearButtons();
 		this.createTabButtons();
 		this.getListWidget().refreshEntries();
@@ -90,7 +95,7 @@ public class GuiMacroManager extends GuiListBase<MacroBase, WidgetMacroEntry, Wi
 		this.addButton(addMacroButton, (btn, mbtn) -> {
 			String string = "macro ";
 			string += MacroManager.getAllMacros().size();
-			MacroManager.addMacroToTop(new MacroBase(string, "", new ArrayList<>()));
+			MacroManager.addMacroToTop(new MacroBase(string, "", KeybindSettings.PRESS_ALLOWEXTRA, new ArrayList<>()));
 			MacroManager.saveChanges();
 			this.getListWidget().refreshEntries();
 		});

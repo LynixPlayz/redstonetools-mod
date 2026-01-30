@@ -7,6 +7,7 @@ import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
+import tools.redstone.redstonetools.Commands;
 
 public class ReachFeature {
 	public static final ReachFeature INSTANCE = new ReachFeature();
@@ -16,7 +17,7 @@ public class ReachFeature {
 
 	public void registerCommand(CommandDispatcher<ServerCommandSource> dispatcher, CommandRegistryAccess registryAccess, CommandManager.RegistrationEnvironment registrationEnvironment) {
 			dispatcher.register(CommandManager.literal("reach")
-				.requires(source -> source.hasPermissionLevel(2))
+				.requires(Commands.PERMISSION_LEVEL_2)
 				.then(CommandManager.argument("reach", FloatArgumentType.floatArg(0.0f))
 					.executes(context -> execute(context, true, true))
 				)

@@ -103,11 +103,7 @@ public class Configs implements IConfigHandler {
 		);
 
 		public static int getHeightInPixels() {
-			try {
-				return BIGDUST_HEIGHT_IN_PIXELS.getIntegerValue();
-			} catch (Exception ignored) {
-				return 1;
-			}
+			return BIGDUST_HEIGHT_IN_PIXELS.getIntegerValue();
 		}
 	}
 

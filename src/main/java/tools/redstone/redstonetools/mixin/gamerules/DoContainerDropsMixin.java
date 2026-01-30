@@ -11,11 +11,15 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import tools.redstone.redstonetools.RedstoneToolsGameRules;
 
 @Mixin(ItemScatterer.class)
-public class DoContainerDropsMixin {
+public abstract class DoContainerDropsMixin {
 	@Inject(method = "spawn(Lnet/minecraft/world/World;DDDLnet/minecraft/item/ItemStack;)V", at = @At("HEAD"), cancellable = true)
 	private static void preventSpawning(World world, double x, double y, double z, ItemStack stack, CallbackInfo ci) {
 		if (world instanceof ServerWorld serverWorld) {
-			if (!serverWorld.getGameRules().getBoolean(RedstoneToolsGameRules.DO_CONTAINER_DROPS)) ci.cancel();
+			//? if <=1.21.10 {
+			/*if (!serverWorld.getGameRules().getBoolean(RedstoneToolsGameRules.DO_CONTAINER_DROPS)) ci.cancel();
+			*///?} else {
+			if (!serverWorld.getGameRules().getValue(RedstoneToolsGameRules.DO_CONTAINER_DROPS)) ci.cancel();
+			//?}
 		}
 	}
 }

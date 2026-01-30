@@ -2,14 +2,21 @@ package tools.redstone.redstonetools.malilib.widget.action;
 
 import fi.dy.masa.malilib.gui.button.ButtonBase;
 import fi.dy.masa.malilib.gui.button.ButtonGeneric;
+//? if >=1.21.11 {
+import fi.dy.masa.malilib.render.GuiContext;
+//?}
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.gui.ScreenRect;
+import net.minecraft.client.gui.navigation.GuiNavigation;
+import net.minecraft.client.gui.navigation.GuiNavigationPath;
+import net.minecraft.client.gui.navigation.NavigationAxis;
+import net.minecraft.client.gui.navigation.NavigationDirection;
 import net.minecraft.client.gui.screen.ChatInputSuggestor;
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
 import net.minecraft.client.gui.widget.EntryListWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
-/*$ click_and_inputs_imports {*/
-//
+/*$ click_and_inputs_imports {*///
 import net.minecraft.client.gui.Click;
 import net.minecraft.client.input.KeyInput;
 import net.minecraft.client.input.CharInput;/*$}*/
@@ -21,7 +28,10 @@ import tools.redstone.redstonetools.malilib.GuiMacroEditor;
 import tools.redstone.redstonetools.malilib.widget.macro.MacroBase;
 import tools.redstone.redstonetools.mixin.features.ChatInputSuggestorAccessor;
 import tools.redstone.redstonetools.mixin.features.SuggestionWindowAccessor;
+//? if >=1.21.10 {
 import tools.redstone.redstonetools.mixin.features.TextFieldWidgetAccessor;
+//?}
+
 
 public class CommandListWidget extends EntryListWidget<CommandListWidget.CommandEntry> {
 	private final GuiMacroEditor parent;
@@ -36,9 +46,9 @@ public class CommandListWidget extends EntryListWidget<CommandListWidget.Command
 		for (CommandAction commandAction : this.macro.actions) {
 			CommandEntry entry = new CommandEntry(commandAction);
 			this.addEntry(entry);
-			entry.afterAdded();
 			this.setSelected(entry);
 		}
+		this.recalculateAllActionsPositions();
 		this.setSelected(null);
 	}
 
@@ -96,12 +106,36 @@ public class CommandListWidget extends EntryListWidget<CommandListWidget.Command
 	@Override
 	public void setScrollY(double scrollY) {
 		super.setScrollY(scrollY);
+		recalculateAllActionsPositions();
 		if (this.commandSuggester != null && this.getSelectedOrNull() != null) {
 			ChatInputSuggestor.SuggestionWindow window = ((ChatInputSuggestorAccessor) this.commandSuggester).getWindow();
 			if (window == null) return;
 			Rect2i area = ((SuggestionWindowAccessor) window).getArea();
-			area.setY(this.getSelectedOrNull().getY() + 20);
+			area.setY(this.getSelectedOrNull().commandWidget.getY() + 23);
 		}
+	}
+
+	@Override
+	public @Nullable GuiNavigationPath getNavigationPath(GuiNavigation navigation) {
+		if (this.getEntryCount() == 0) {
+			return null;
+		}
+		if (!this.isFocused()) {
+			return GuiNavigationPath.of(this);
+		}
+		if (!(navigation instanceof GuiNavigation.Arrow(NavigationDirection navigationDirection))) {
+			return super.getNavigationPath(navigation);
+		}
+		if (navigationDirection.getAxis() == NavigationAxis.HORIZONTAL) {
+			return GuiNavigationPath.of(this.getSelectedOrNull(), this);
+		}
+
+		CommandEntry neighboringEntry = this.getNeighboringEntry(navigationDirection);
+		if (neighboringEntry == null) {
+			return GuiNavigationPath.of(this.getSelectedOrNull(), this);
+		}
+
+		return GuiNavigationPath.of(neighboringEntry, this);
 	}
 
 	@Override
@@ -130,12 +164,15 @@ public class CommandListWidget extends EntryListWidget<CommandListWidget.Command
 		}
 	}
 
-	//? if >=1.21.10 {
 	@Override
+	//? if >=1.21.10 {
 	protected boolean isEntrySelectionAllowed() {
+	//?} else {
+	/*protected boolean isSelectedEntry(int index) {
+	*///?}
 		return false;
 	}
-	//?}
+
 
 	@Override
 	public int getRowWidth() {
@@ -147,9 +184,19 @@ public class CommandListWidget extends EntryListWidget<CommandListWidget.Command
 		CommandEntry entry = new CommandEntry(this.macro.actions.getFirst());
 		this.addEntryToTop(entry);
 		this.centerScrollOn(this.getFirst());
-		entry.afterAdded();
+		recalculateAllActionsPositions();
 		if (this.commandSuggester != null) {
 			this.commandSuggester.refresh();
+		}
+	}
+
+	private void recalculateAllActionsPositions() {
+		int i = this.getY() - (int) this.getScrollY();
+
+		for (CommandEntry entry : this.children()) {
+			entry.removeButton.setY(i + 6);
+			entry.commandWidget.setY(i + 3);
+			i += this.itemHeight;
 		}
 	}
 
@@ -164,7 +211,6 @@ public class CommandListWidget extends EntryListWidget<CommandListWidget.Command
 
 	}
 
-	@SuppressWarnings("RedundantIfStatement")
 	public class CommandEntry extends Entry<CommandEntry> {
 		public final CommandAction command;
 		private TextFieldWidget commandWidget;
@@ -172,6 +218,18 @@ public class CommandListWidget extends EntryListWidget<CommandListWidget.Command
 
 		public CommandEntry(CommandAction command) {
 			this.command = command;
+			this.commandWidget = new TextFieldWidget(MinecraftClient.getInstance().textRenderer, CommandListWidget.this.getX() + 4 + 25, 0, CommandListWidget.this.getRowWidth() - 100, 26, Text.of(""));
+			commandWidget.setMaxLength(256);
+			commandWidget.setText(command.command);
+			commandWidget.setChangedListener(this::onCommandChanged);
+
+			this.removeButton = new ButtonGeneric(0, 0, -1, 20, "Remove");
+			this.removeButton.setX(CommandListWidget.this.getX() + CommandListWidget.this.getRowWidth() - this.removeButton.getWidth() - 10 + 25);
+			this.removeButton.setActionListener((button, mouseButton) -> {
+				CommandListWidget.this.macro.actions.remove(CommandListWidget.this.children().indexOf(this));
+				CommandListWidget.this.removeEntryWithoutScrolling(this);
+				recalculateAllActionsPositions();
+			});
 		}
 
 		private void onCommandChanged(String text) {
@@ -181,40 +239,27 @@ public class CommandListWidget extends EntryListWidget<CommandListWidget.Command
 			}
 		}
 
-		public void afterAdded() {
-			this.commandWidget = new TextFieldWidget(MinecraftClient.getInstance().textRenderer, this.getX() + 4, this.getY() + 3, this.getWidth() - 100, 26, Text.of(""));
-			commandWidget.setMaxLength(256);
-			commandWidget.setText(command.command);
-			commandWidget.setChangedListener(this::onCommandChanged);
-
-			this.removeButton = new ButtonGeneric(0, this.getY() + 6, -1, 20, "Remove");
-			this.removeButton.setX(this.getX() + this.getWidth() - this.removeButton.getWidth() - 10);
-			this.removeButton.setActionListener((button, mouseButton) -> {
-				CommandListWidget.this.macro.actions.remove(CommandListWidget.this.children().indexOf(this));
-				CommandListWidget.this.removeEntry(this);
-			});
-		}
-
 		@Override
 		public void render(DrawContext context, /*? if <1.21.10 {*/ /*int index, int argY, int argX, int entryWidth, int entryHeight, *//*?}*/ int mouseX, int mouseY, boolean hovered, float tickProgress) {
-			int x = /*? if <1.21.10 {*//*argX*//*?} else {*/this.getX()/*?}*/;
-			int y = /*? if <1.21.10 {*//*argY*//*?} else {*/this.getY()/*?}*/;
-			int width = /*? if <1.21.10 {*//*entryWidth*//*?} else {*/this.getWidth()/*?}*/;
-			this.commandWidget.setX(x + 4);
-			this.commandWidget.setY(y + 3);
 			commandWidget.render(context, mouseX, mouseY, tickProgress);
 
-			this.removeButton.setX(x + width - this.removeButton.getWidth() - 10);
-			this.removeButton.setY(y + 6);
 			//? if <=1.21.5 {
 			/*removeButton.render(mouseX, mouseY, removeButton.isMouseOver(), context);
+			*///?} else if <=1.21.10 {
+			/*removeButton.render(context, mouseX, mouseY, removeButton.isMouseOver());
 			*///?} else {
-			removeButton.render(context, mouseX, mouseY, removeButton.isMouseOver());
+			GuiContext guiContext = GuiContext.fromGuiGraphics(context);
+			ScreenRect last = context.scissorStack.peekLast();
+			if (last != null) {
+				guiContext.pushScissor(last);
+			}
+			removeButton.render(guiContext, mouseX, mouseY, removeButton.isMouseOver());
 			//?}
 		}
 
 		@Override
 		public void setFocused(boolean focused) {
+			super.setFocused(focused);
 			commandWidget.setFocused(focused);
 		}
 
