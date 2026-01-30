@@ -11,6 +11,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
+import tools.redstone.redstonetools.Commands;
 import tools.redstone.redstonetools.utils.ArgumentUtils;
 import tools.redstone.redstonetools.utils.SignalBlock;
 
@@ -29,7 +30,7 @@ public class SignalStrengthBlockFeature {
 
 	public void registerCommand(CommandDispatcher<ServerCommandSource> dispatcher, CommandRegistryAccess registryAccess, CommandManager.RegistrationEnvironment registrationEnvironment) {
 			dispatcher.register(literal("ssb")
-				.requires(source -> source.hasPermissionLevel(2))
+				.requires(Commands.PERMISSION_LEVEL_2)
 				.executes(this::parseArguments)
 				.then(argument("signalStrength", IntegerArgumentType.integer())
 						.executes(this::parseArguments)

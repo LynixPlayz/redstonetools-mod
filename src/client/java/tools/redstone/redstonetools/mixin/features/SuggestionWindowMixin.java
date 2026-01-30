@@ -1,14 +1,12 @@
 package tools.redstone.redstonetools.mixin.features;
 
+import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import net.minecraft.client.gui.screen.ChatInputSuggestor;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.Unique;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import tools.redstone.redstonetools.utils.StringUtils;
 
 @Mixin(ChatInputSuggestor.SuggestionWindow.class)
@@ -17,17 +15,11 @@ public class SuggestionWindowMixin {
 	@Final
 	ChatInputSuggestor field_21615;
 
-	@Unique
-	private static String beforeComplete;
-
-	@Inject(method = "complete", at = @At("HEAD"))
-	private void mroeww(CallbackInfo ci) {
-		beforeComplete = ((ChatInputSuggestorAccessor) this.field_21615).getTextField().getText();
-	}
-
-	@Inject(method = "complete", at = @At("RETURN"))
-	private void mrawww(CallbackInfo ci) {
+	@WrapMethod(method = "complete")
+	private void expandVariablesToo(Operation<Void> original) {
 		TextFieldWidget textField = ((ChatInputSuggestorAccessor) this.field_21615).getTextField();
+		String beforeComplete = textField.getText();
+		original.call();
 		if (StringUtils.expand(beforeComplete, textField.getText()).equals(textField.getText())) return;
 		textField.setText(StringUtils.expand(beforeComplete, textField.getText()));
 	}

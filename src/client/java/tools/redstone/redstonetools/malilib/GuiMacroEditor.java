@@ -2,12 +2,15 @@ package tools.redstone.redstonetools.malilib;
 
 import fi.dy.masa.malilib.config.IConfigBoolean;
 import fi.dy.masa.malilib.config.options.ConfigBoolean;
+import fi.dy.masa.malilib.event.InputEventHandler;
 import fi.dy.masa.malilib.gui.GuiBase;
 import fi.dy.masa.malilib.gui.GuiKeybindSettings;
 import fi.dy.masa.malilib.gui.button.ConfigButtonBoolean;
 import fi.dy.masa.malilib.gui.button.ConfigButtonKeybind;
 import fi.dy.masa.malilib.gui.widgets.WidgetKeybindSettings;
-import net.minecraft.client.MinecraftClient;
+//? if >=1.21.11 {
+import fi.dy.masa.malilib.render.GuiContext;
+//?}
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
@@ -27,21 +30,20 @@ import java.util.List;
 
 public class GuiMacroEditor extends Screen {
 	public final MacroBase macro;
-	private final GuiMacroManager parent;
-	private CommandListWidget commandList;
+	private final GuiMacroManager macroManager;
+	public CommandListWidget commandList;
 	private ConfigButtonKeybind buttonKeybind;
 	private ConfigButtonBoolean buttonEnabled;
 	private ConfigButtonBoolean buttonMuted;
 	private WidgetKeybindSettings widgetAdvancedKeybindSettings;
-	private IConfigBoolean configBoolean;
-	private IConfigBoolean configBoolean2;
+	private IConfigBoolean enabledConfigBoolean;
+	private IConfigBoolean mutedConfigBoolean;
 	public TextFieldWidget nameWidget;
 	private float errorCountDown;
 
-	public GuiMacroEditor(Text title, MacroBase macro, GuiMacroManager parent) {
+	public GuiMacroEditor(Text title, MacroBase macro, GuiMacroManager macroManager) {
 		super(title);
-		this.parent = parent;
-		this.client = MinecraftClient.getInstance();
+		this.macroManager = macroManager;
 		this.macro = macro;
 	}
 
@@ -56,11 +58,16 @@ public class GuiMacroEditor extends Screen {
 		buttonEnabled.render(mouseX, mouseY, buttonEnabled.isMouseOver(mouseX, mouseY), context);
 		buttonMuted.render(mouseX, mouseY, buttonMuted.isMouseOver(mouseX, mouseY), context);
 		widgetAdvancedKeybindSettings.render(mouseX, mouseY, widgetAdvancedKeybindSettings.isMouseOver(mouseX, mouseY), context);
-		*///?} else {
-		buttonKeybind.render(context, mouseX, mouseY, buttonKeybind.isMouseOver(mouseX, mouseY));
+		*///?} else if <=1.21.10 {
+		/*buttonKeybind.render(context, mouseX, mouseY, buttonKeybind.isMouseOver(mouseX, mouseY));
 		buttonEnabled.render(context, mouseX, mouseY, buttonEnabled.isMouseOver(mouseX, mouseY));
 		buttonMuted.render(context, mouseX, mouseY, buttonMuted.isMouseOver(mouseX, mouseY));
 		widgetAdvancedKeybindSettings.render(context, mouseX, mouseY, widgetAdvancedKeybindSettings.isMouseOver(mouseX, mouseY));
+		*///?} else {
+		buttonKeybind.render(GuiContext.fromGuiGraphics(context), mouseX, mouseY, buttonKeybind.isMouseOver(mouseX, mouseY));
+		buttonEnabled.render(GuiContext.fromGuiGraphics(context), mouseX, mouseY, buttonEnabled.isMouseOver(mouseX, mouseY));
+		buttonMuted.render(GuiContext.fromGuiGraphics(context), mouseX, mouseY, buttonMuted.isMouseOver(mouseX, mouseY));
+		widgetAdvancedKeybindSettings.render(GuiContext.fromGuiGraphics(context), mouseX, mouseY, widgetAdvancedKeybindSettings.isMouseOver(mouseX, mouseY));
 		//?}
 		if (errorCountDown > 0.0f) {
 			context.drawText(this.textRenderer, "Name already exists!", mouseX, mouseY - 10, 0xFFFFFFFF, true);
@@ -78,19 +85,19 @@ public class GuiMacroEditor extends Screen {
 		minMaxLayouts.add(new GuiUtils.MinMaxLayout(-1, -1, -1, -1)); // name widget
 		minMaxLayouts.add(new GuiUtils.MinMaxLayout(-1, -1, -1, -1)); // mute
 		List<GuiUtils.Layout> layouts = GuiUtils.betterGetWidgetLayout(minMaxLayouts, 10, this.width, true, 50, this.height - 52, 20);
-		GuiUtils.Layout ncLayout = layouts.get(0);
-		GuiUtils.Layout bkLayout = layouts.get(1);
-		GuiUtils.Layout akoLayout = layouts.get(2);
-		GuiUtils.Layout beLayout = layouts.get(3);
-		GuiUtils.Layout nwLayout = layouts.get(4);
-		GuiUtils.Layout bmLayout = layouts.get(5);
+		GuiUtils.Layout addCommandLayout = layouts.get(0);
+		GuiUtils.Layout buttonKeybindLayout = layouts.get(1);
+		GuiUtils.Layout keybindSettingsLayout = layouts.get(2);
+		GuiUtils.Layout buttonEnabledLayout = layouts.get(3);
+		GuiUtils.Layout nameWidgetLayout = layouts.get(4);
+		GuiUtils.Layout buttonMutedLayout = layouts.get(5);
 		this.commandList = this.addDrawableChild(
 			new CommandListWidget(this, this.client, this.width, this.height - 75, 0, 36, this.macro));
 		this.addDrawableChild(ButtonWidget.builder(Text.of("Add command"), button ->
 				this.commandList.addEntry())
-			.dimensions(ncLayout.x(), ncLayout.y(), ncLayout.width(), ncLayout.height())
+			.dimensions(addCommandLayout.x(), addCommandLayout.y(), addCommandLayout.width(), addCommandLayout.height())
 			.build());
-		this.widgetAdvancedKeybindSettings = new WidgetKeybindSettings(akoLayout.x(), akoLayout.y(), akoLayout.width(), akoLayout.height(), macro.hotkey.getKeybind(), "", null, null) {
+		this.widgetAdvancedKeybindSettings = new WidgetKeybindSettings(keybindSettingsLayout.x(), keybindSettingsLayout.y(), keybindSettingsLayout.width(), keybindSettingsLayout.height(), macro.hotkey.getKeybind(), "", null, null) {
 			@Override
 			protected boolean onMouseClickedImpl(/*? if >=1.21.10 {*/Click click, boolean doubleClick/*?} else {*//*int mouseX, int mouseY, int button*//*?}*/) {
 				//? if >=1.21.10 {
@@ -102,7 +109,7 @@ public class GuiMacroEditor extends Screen {
 				} else return super.onMouseClickedImpl(/*? if >=1.21.10 {*/click, doubleClick/*?} else {*//*mouseX, mouseY, button*//*?}*/);
 			}
 		};
-		this.buttonKeybind = new ConfigButtonKeybind(bkLayout.x(), bkLayout.y(), bkLayout.width(), bkLayout.height(), macro.hotkey.getKeybind(), null) {
+		this.buttonKeybind = new ConfigButtonKeybind(buttonKeybindLayout.x(), buttonKeybindLayout.y(), buttonKeybindLayout.width(), buttonKeybindLayout.height(), macro.hotkey.getKeybind(), null) {
 			@Override
 			public boolean onMouseClicked(/*? if >=1.21.10 {*/Click click, boolean doubleClick/*?} else {*//*int mouseX, int mouseY, int button*//*?}*/) {
 				if (!this.isMouseOver(/*? if >=1.21.10 {*/(int) click.x(), (int) click.y()/*?} else {*//*mouseX, mouseY*//*?}*/)) {
@@ -118,29 +125,27 @@ public class GuiMacroEditor extends Screen {
 				super.onClearSelection();
 			}
 		};
-		this.configBoolean = new ConfigBoolean("", true, "");
-		this.configBoolean.setBooleanValue(this.macro.isEnabled());
-		this.configBoolean2 = new ConfigBoolean("", true, "");
-		this.configBoolean2.setBooleanValue(this.macro.muted);
-		final String beName = "Enabled: ";
-		final String bmName = "Muted: ";
-		this.buttonEnabled = new ConfigButtonBoolean(beLayout.x(), beLayout.y(), beLayout.width(), beLayout.height(), this.configBoolean) {
+		this.enabledConfigBoolean = new ConfigBoolean("", true, "");
+		this.enabledConfigBoolean.setBooleanValue(this.macro.isEnabled());
+		this.mutedConfigBoolean = new ConfigBoolean("", true, "");
+		this.mutedConfigBoolean.setBooleanValue(this.macro.muted);
+		this.buttonEnabled = new ConfigButtonBoolean(buttonEnabledLayout.x(), buttonEnabledLayout.y(), buttonEnabledLayout.width(), buttonEnabledLayout.height(), this.enabledConfigBoolean) {
 			@Override
 			public void updateDisplayString() {
 				super.updateDisplayString();
-				this.displayString = beName + this.displayString;
+				this.displayString = "Enabled: " + this.displayString;
 			}
 		};
-		this.buttonMuted = new ConfigButtonBoolean(bmLayout.x(), bmLayout.y(), bmLayout.width(), bmLayout.height(), this.configBoolean2) {
+		this.buttonMuted = new ConfigButtonBoolean(buttonMutedLayout.x(), buttonMutedLayout.y(), buttonMutedLayout.width(), buttonMutedLayout.height(), this.mutedConfigBoolean) {
 			@Override
 			public void updateDisplayString() {
 				super.updateDisplayString();
-				this.displayString = bmName + this.displayString;
+				this.displayString = "Muted: " + this.displayString;
 			}
 		};
-		this.nameWidget = addDrawableChild(new TextFieldWidget(this.textRenderer, nwLayout.width(), nwLayout.height(), Text.of("")));
+		this.nameWidget = addDrawableChild(new TextFieldWidget(this.textRenderer, nameWidgetLayout.width(), nameWidgetLayout.height(), Text.of("")));
 		this.nameWidget.setText(macro.getName());
-		this.nameWidget.setPosition(nwLayout.x(), nwLayout.y());
+		this.nameWidget.setPosition(nameWidgetLayout.x(), nameWidgetLayout.y());
 	}
 
 	@Override
@@ -148,6 +153,7 @@ public class GuiMacroEditor extends Screen {
 		//? if >=1.21.10 {
 		int keyCode = input.key();
 		//?}
+		if (this.commandList.keyPressed(/*$ keyinput_args {*/input/*$}*/)) return true;
 		buttonEnabled.onKeyTyped(/*$ keyinput_args {*/input/*$}*/);
 		buttonMuted.onKeyTyped(/*$ keyinput_args {*/input/*$}*/);
 		widgetAdvancedKeybindSettings.onKeyTyped(/*$ keyinput_args {*/input/*$}*/);
@@ -157,10 +163,7 @@ public class GuiMacroEditor extends Screen {
 			buttonKeybind.onClearSelection();
 			return true;
 		}
-		if (this.commandList.keyPressed(/*$ keyinput_args {*/input/*$}*/))
-			return true;
-		else
-			return super.keyPressed(/*$ keyinput_args {*/input/*$}*/);
+		return super.keyPressed(/*$ keyinput_args {*/input/*$}*/);
 	}
 
 	@Override
@@ -170,48 +173,36 @@ public class GuiMacroEditor extends Screen {
 
 	@Override
 	public boolean mouseClicked(/*$ mouse_clicked_params {*/Click click, boolean doubleClick/*$}*/) {
-		if (buttonKeybind.onMouseClicked(/*$ on_mouse_clicked_args {*/click, doubleClick/*$}*/)) {
+		if (super.mouseClicked(/*$ mouse_clicked_args {*/click, doubleClick/*$}*/)) return true;
+		boolean buttonKeybindClicked = buttonKeybind.onMouseClicked(/*$ on_mouse_clicked_args {*/click, doubleClick/*$}*/);
+		boolean buttonEnabledClicked = buttonEnabled.onMouseClicked(/*$ on_mouse_clicked_args {*/click, doubleClick/*$}*/);
+		boolean buttonMutedClicked = buttonMuted.onMouseClicked(/*$ on_mouse_clicked_args {*/click, doubleClick/*$}*/);
+		boolean widgetAdvancedKeybindSettingsClicked = widgetAdvancedKeybindSettings.onMouseClicked(/*$ on_mouse_clicked_args {*/click, doubleClick/*$}*/);
+		boolean commandListClicked = commandList.mouseClicked(/*$ mouse_clicked_args {*/click, doubleClick/*$}*/);
+		if (buttonKeybindClicked || buttonEnabledClicked || buttonMutedClicked || widgetAdvancedKeybindSettingsClicked || commandListClicked) {
 			if (this.getFocused() != null) {
-				this.getFocused().setFocused(false);
+				this.setFocused(null);
 			}
 			return true;
 		}
-		else if (buttonEnabled.onMouseClicked(/*$ on_mouse_clicked_args {*/click, doubleClick/*$}*/)) {
-			if (this.getFocused() != null) {
-				this.getFocused().setFocused(false);
-			}
-			return true;
-		}
-		else if (buttonMuted.onMouseClicked(/*$ on_mouse_clicked_args {*/click, doubleClick/*$}*/)) {
-			if (this.getFocused() != null) {
-				this.getFocused().setFocused(false);
-			}
-			return true;
-		}
-		else if (widgetAdvancedKeybindSettings.onMouseClicked(/*$ on_mouse_clicked_args {*/click, doubleClick/*$}*/)) {
-			if (this.getFocused() != null) {
-				this.getFocused().setFocused(false);
-			}
-			return true;
-		}
-		else if (super.mouseClicked(/*$ mouse_clicked_args {*/click, doubleClick/*$}*/)) return true;
-		else return commandList.mouseClicked(/*$ mouse_clicked_args {*/click, doubleClick/*$}*/);
+		return false;
 	}
 
 	@Override
 	public boolean mouseReleased(/*$ dragged_released_params {*/Click click/*$}*/) {
+		if (super.mouseReleased(/*$ dragged_released_args {*/click/*$}*/)) return true;
+		if (commandList.mouseReleased(/*$ dragged_released_args {*/click/*$}*/)) return true;
 		buttonKeybind.onMouseReleased(/*$ on_released_args {*/click/*$}*/);
 		buttonEnabled.onMouseReleased(/*$ on_released_args {*/click/*$}*/);
 		buttonMuted.onMouseReleased(/*$ on_released_args {*/click/*$}*/);
 		widgetAdvancedKeybindSettings.onMouseReleased(/*$ on_released_args {*/click/*$}*/);
-		if (commandList.mouseReleased(/*$ dragged_released_args {*/click/*$}*/)) return true;
-		else return super.mouseReleased(/*$ dragged_released_args {*/click/*$}*/);
+		return false;
 	}
 
 	@Override
 	public boolean mouseDragged(/*$ dragged_released_params {*/Click click/*$}*/, double deltaX, double deltaY) {
 		if (commandList.mouseDragged(/*$ dragged_released_args {*/click/*$}*/, deltaX, deltaY)) return true;
-		else return super.mouseDragged(/*$ dragged_released_args {*/click/*$}*/, deltaX, deltaY);
+		return super.mouseDragged(/*$ dragged_released_args {*/click/*$}*/, deltaX, deltaY);
 	}
 
 	@Override
@@ -274,12 +265,13 @@ public class GuiMacroEditor extends Screen {
 		}
 		this.macro.actions.clear();
 		this.commandList.children().forEach(t -> this.macro.actions.add(t.command));
-		this.macro.setEnabled(this.configBoolean.getBooleanValue());
-		this.macro.muted = this.configBoolean2.getBooleanValue();
+		this.macro.setEnabled(this.enabledConfigBoolean.getBooleanValue());
+		this.macro.muted = this.mutedConfigBoolean.getBooleanValue();
 		this.macro.setName(this.nameWidget.getText());
 		MacroManager.saveChanges();
+		InputEventHandler.getKeybindManager().updateUsedKeys();
 		assert client != null;
-		parent.initGui();
-		GuiBase.openGui(parent);
+		macroManager.initGui();
+		GuiBase.openGui(macroManager);
 	}
 }

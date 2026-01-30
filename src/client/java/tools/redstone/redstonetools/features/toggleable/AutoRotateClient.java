@@ -3,6 +3,7 @@ package tools.redstone.redstonetools.features.toggleable;
 import fi.dy.masa.malilib.config.options.ConfigBoolean;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import net.minecraft.client.MinecraftClient;
 import tools.redstone.redstonetools.malilib.config.Configs;
 import tools.redstone.redstonetools.packets.SetFeatureEnabledPayload;
 
@@ -16,9 +17,10 @@ public class AutoRotateClient {
 		});
 
 		isEnabled.setValueChangeCallback((t) -> {
-			System.out.println(t.getBooleanValue());
-			SetFeatureEnabledPayload payload = new SetFeatureEnabledPayload("AutoRotate", t.getBooleanValue());
-			ClientPlayNetworking.send(payload);
+			if (MinecraftClient.getInstance().getNetworkHandler() != null) {
+				SetFeatureEnabledPayload payload = new SetFeatureEnabledPayload("AutoRotate", t.getBooleanValue());
+				ClientPlayNetworking.send(payload);
+			}
 		});
 	}
 }

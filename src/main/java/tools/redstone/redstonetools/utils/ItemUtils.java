@@ -62,7 +62,6 @@ public class ItemUtils {
 			data.remove("command");
 			stack.set(DataComponentTypes.CUSTOM_DATA, NbtComponent.of(data));
 		}
-		System.out.println(stack);
 	}
 
 	private static NbtCompound getCustomData(ItemStack stack) {

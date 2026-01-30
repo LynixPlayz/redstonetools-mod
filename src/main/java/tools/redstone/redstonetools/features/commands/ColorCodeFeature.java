@@ -20,6 +20,7 @@ import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.Nullable;
+import tools.redstone.redstonetools.Commands;
 import tools.redstone.redstonetools.utils.*;
 
 import static net.minecraft.server.command.CommandManager.argument;
@@ -33,7 +34,7 @@ public class ColorCodeFeature {
 
 	public void registerCommand(CommandDispatcher<ServerCommandSource> dispatcher, CommandRegistryAccess registryAccess, CommandManager.RegistrationEnvironment registrationEnvironment) {
 		dispatcher.register(literal("/colorcode")
-			.requires(source -> source.hasPermissionLevel(2))
+			.requires(Commands.PERMISSION_LEVEL_2)
 			.then(argument("color", StringArgumentType.string()).suggests(ArgumentUtils.BLOCK_COLOR_SUGGESTION_PROVIDER)
 				.executes(this::execute)
 				.then(argument("onlyColor", StringArgumentType.string()).suggests(ArgumentUtils.BLOCK_COLOR_SUGGESTION_PROVIDER)

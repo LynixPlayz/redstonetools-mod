@@ -30,7 +30,6 @@ public class MathUtils {
 		if (components[0].equals("(")) {
 			components = removeAt(components, 0);
 			for (int i = 0; i < components.length; i++) {
-				System.out.println(Arrays.toString(components));
 				if (components[i].equals("(")) {
 					components = ArrayUtils.addAll(Arrays.copyOfRange(components, 0, i), reduceMathExpression(Arrays.copyOfRange(components, i+1, components.length)));
 					i = 0;

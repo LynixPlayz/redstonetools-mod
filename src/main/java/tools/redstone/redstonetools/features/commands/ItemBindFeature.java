@@ -11,6 +11,7 @@ import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
+import tools.redstone.redstonetools.Commands;
 import tools.redstone.redstonetools.utils.ItemUtils;
 
 import java.util.ArrayList;
@@ -26,7 +27,7 @@ public class ItemBindFeature {
 
 	public void registerCommand(CommandDispatcher<ServerCommandSource> dispatcher, CommandRegistryAccess registryAccess, CommandManager.RegistrationEnvironment registrationEnvironment) {
 			dispatcher.register(literal("itembind")
-				.requires(source -> source.hasPermissionLevel(2))
+				.requires(Commands.PERMISSION_LEVEL_2)
 				.executes(this::execute)
 				.then(literal("reset")
 					.executes(ItemBindFeature::executeReset)));

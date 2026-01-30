@@ -9,7 +9,6 @@ import fi.dy.masa.malilib.config.options.*;
 import fi.dy.masa.malilib.util.JsonUtils;
 import net.minecraft.client.MinecraftClient;
 import tools.redstone.redstonetools.RedstoneTools;
-import tools.redstone.redstonetools.features.toggleable.AutoDustClient;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -104,11 +103,7 @@ public class Configs implements IConfigHandler {
 		);
 
 		public static int getHeightInPixels() {
-			try {
-				return BIGDUST_HEIGHT_IN_PIXELS.getIntegerValue();
-			} catch (Exception ignored) {
-				return 1;
-			}
+			return BIGDUST_HEIGHT_IN_PIXELS.getIntegerValue();
 		}
 	}
 

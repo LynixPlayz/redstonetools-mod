@@ -16,6 +16,7 @@ import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
+import tools.redstone.redstonetools.Commands;
 import tools.redstone.redstonetools.utils.WorldEditUtils;
 
 import java.util.ArrayList;
@@ -32,7 +33,7 @@ public class MinSelectionFeature {
 
 	public void registerCommand(CommandDispatcher<ServerCommandSource> dispatcher, CommandRegistryAccess registryAccess, CommandManager.RegistrationEnvironment registrationEnvironment) {
 			dispatcher.register(literal("/minsel")
-				.requires(source -> source.hasPermissionLevel(2))
+				.requires(Commands.PERMISSION_LEVEL_2)
 				.executes(this::execute));
 	}
 
@@ -52,8 +53,10 @@ public class MinSelectionFeature {
 		assert BlockTypes.AIR != null;
 		boolean isEmpty = true;
 		for (BlockVector3 point : selection) {
-			if (!selectionWorld.getBlock(point).equals(BlockTypes.AIR.getDefaultState()))
+			if (selectionWorld.getBlock(point).getBlockType() != BlockTypes.AIR) {
 				isEmpty = false;
+				break;
+			}
 		}
 
 		if (isEmpty) {
@@ -75,20 +78,13 @@ public class MinSelectionFeature {
 		var faces = getFaces(selection);
 		var finished = true;
 
-		for (CuboidRegion face : faces) {
-			var isOnlyAir = true;
-
+		faceLoop: for (CuboidRegion face : faces) {
 			for (BlockVector3 point : face) {
 				assert BlockTypes.AIR != null;
-				if (selectionWorld.getBlock(point).getBlockType().getDefaultState() != BlockTypes.AIR
-						.getDefaultState()) {
-					isOnlyAir = false;
-					break;
+				if (selectionWorld.getBlock(point).getBlockType() != BlockTypes.AIR) {
+					continue faceLoop;
 				}
 			}
-
-			if (!isOnlyAir)
-				continue;
 
 			var difference = selection.getCenter().subtract(face.getCenter());
 			difference = difference.normalize();
