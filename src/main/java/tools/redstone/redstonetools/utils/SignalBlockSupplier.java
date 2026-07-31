@@ -10,10 +10,18 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.item.component.ItemContainerContents;
+//? if >=1.21.10 {
+import net.minecraft.world.item.component.TypedEntityData;
+//?} else {
+/*import net.minecraft.world.item.component.CustomData;
+*///?}
 import net.minecraft.world.level.block.Block;
-
+//? if >=26.2 {
+/*import net.minecraft.world.level.block.entity.BlockEntityTypes;
+*///?} else if >=1.21.10 {
+import net.minecraft.world.level.block.entity.BlockEntityType;
+//?}
 @FunctionalInterface
 public interface SignalBlockSupplier {
 
@@ -73,9 +81,19 @@ public interface SignalBlockSupplier {
 			CompoundTag blockEntityNbt = new CompoundTag();
 			blockEntityNbt.putInt("SuccessCount", signalStrength);
 
-			CustomData blockEntityData = CustomData.of(blockEntityNbt);
-
-			commandBlockStack.set(DataComponents.CUSTOM_DATA, blockEntityData);
+			//? if <1.21.10  {
+			/*blockEntityNbt.putString("id", "minecraft:command_block");
+			commandBlockStack.set(DataComponents.BLOCK_ENTITY_DATA, CustomData.of(blockEntityNbt));
+			*///?} else {
+			commandBlockStack.set(
+				DataComponents.BLOCK_ENTITY_DATA,
+				//? if >=26.2 {
+				/*TypedEntityData.of(BlockEntityTypes.COMMAND_BLOCK, blockEntityNbt)
+				*///?} else {
+				TypedEntityData.of(BlockEntityType.COMMAND_BLOCK, blockEntityNbt)
+				//?}
+			);
+			//?}
 			return commandBlockStack;
 		};
 	}
