@@ -20,6 +20,18 @@ public enum SignalBlock {
 	COMMAND_BLOCK(Blocks.COMMAND_BLOCK, SignalBlockSupplier.commandBlock()),
 	AUTO(null, null);
 
+	/**
+	 * Signal strength at which {@code /ssb} switches from a container to a command block.
+	 *
+	 * <p>26.2 validates container contents strictly, so overstacked slots are dropped and a
+	 * container can no longer exceed 15. Below 26.2 the overstacking trick still works, so the
+	 * container is used up to the point where a comparator can no longer read it.
+	 */
+	//? if <26.2 {
+	private static final int COMMAND_BLOCK_THRESHOLD = 1780;
+	 //?} else
+	//private static final int COMMAND_BLOCK_THRESHOLD = 16;
+
 	private final Block block;
 	private final SignalBlockSupplier supplier;
 
@@ -29,7 +41,7 @@ public enum SignalBlock {
 	}
 
 	public static SignalBlock getBestBlock(int signal) {
-		return signal < 1780
+		return signal < COMMAND_BLOCK_THRESHOLD
 				? BARREL
 				: COMMAND_BLOCK;
 	}
