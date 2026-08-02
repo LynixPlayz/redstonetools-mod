@@ -95,6 +95,91 @@ public class AirPlaceFeature extends ClientToggleableFeature {
 		return new BlockHitResult(hit.getLocation(), hit.getDirection(), hit.getBlockPos(), false);
 	}
 
+	//? if <26.1 {
+	private static void renderBlockOutline(WorldRenderContext context, Minecraft client, BlockPos blockPos, BlockState blockState) {
+	//? } else
+	//private static void renderBlockOutline(LevelRenderContext context, Minecraft client, BlockPos blockPos, BlockState blockState) {
+		//? if <26.2 {
+		Camera camera = client.gameRenderer.getMainCamera();
+		 //?} else
+		//Camera camera = client.gameRenderer.mainCamera();
+		Vec3 camPos = camera
+			//? if <=1.21.5 {
+			/*.getPosition();
+			 *///? } else if <=1.21.10 {
+			/*.position();
+			 *///?} else {
+			.position();
+		//?}
+
+		//? if >=26.2 {
+		/*var poseStack = context.poseStack();
+		poseStack.pushPose();
+		poseStack.translate(blockPos.getX() - camPos.x, blockPos.getY() - camPos.y, blockPos.getZ() - camPos.z);
+		context.submitNodeCollector().submitShapeOutline(
+			poseStack,
+			blockState.getShape(client.level, blockPos, net.minecraft.world.phys.shapes.CollisionContext.of(camera.entity())),
+			RenderTypes.lines(),
+			CommonColors.BLACK,
+			client.getWindow().getAppropriateLineWidth(),
+			false
+		);
+		poseStack.popPose();
+		*///?} else {
+
+		//? if <26.1 {
+		VertexConsumer consumer = context.consumers().getBuffer(
+		 //? } else
+		//VertexConsumer consumer = context.bufferSource().getBuffer(
+			//? if <=1.21.10 {
+			/*RenderType.lines()
+			 *///?} else {
+			RenderTypes.lines()
+			//?}
+		);
+
+		//? if <1.21.10 {
+			/*((WorldRendererInvoker) context.worldRenderer()).invokeRenderHitOutline(
+				context.matrixStack(),
+				consumer,
+				client.player,
+				camPos.x, camPos.y, camPos.z,
+				blockPos,
+				blockState,
+				CommonColors.BLACK
+			);
+			*///?} else {
+		//? if <26.1 {
+		((WorldRendererInvoker) context.worldRenderer()).invokeRenderHitOutline(
+		 //? } else
+		//((WorldRendererInvoker) context.levelRenderer()).invokeRenderHitOutline(
+			//? if <26.1 {
+			context.matrices(),
+			 //? } else
+			//context.poseStack(),
+			consumer,
+			camPos.x, camPos.y, camPos.z,
+			//? if <26.1 {
+				new BlockOutlineRenderState(
+					blockPos,
+					false,
+					false,
+					blockState.getShape(client.level, blockPos)
+				),
+				//? } else {
+			/*new BlockOutlineRenderState(
+				blockPos,
+				false,
+				false,
+				blockState.getShape(client.level, blockPos, net.minecraft.world.phys.shapes.CollisionContext.of(camera.entity()))
+			),
+			*///? }
+			CommonColors.BLACK/*? if >=1.21.11 {*/, client.getWindow().getAppropriateLineWidth()/*?}*/
+		);
+		//?}
+		//?}
+	}
+
 	{
 
 		//? if <26.1 {
@@ -133,67 +218,7 @@ public class AirPlaceFeature extends ClientToggleableFeature {
 			if (blockState == null)
 				return;
 
-			/* render block outline */
-			Camera camera = client.gameRenderer.getMainCamera();
-			Vec3 camPos = camera
-				//? if <=1.21.5 {
-				/*.getPosition();
-				*///? } else if <=1.21.10 {
-				/*.position();
-			    *///?} else {
-			    .position();
-			    //?}
-
-			//? if <26.1 {
-			VertexConsumer consumer = context.consumers().getBuffer(
-			//? } else
-			//VertexConsumer consumer = context.bufferSource().getBuffer(
-				//? if <=1.21.10 {
-				/*RenderType.lines()
-				*///?} else {
-				RenderTypes.lines()
-				//?}
-			);
-
-			//? if <1.21.10 {
-			/*((WorldRendererInvoker) context.worldRenderer()).invokeRenderHitOutline(
-				context.matrixStack(),
-				consumer,
-				client.player,
-				camPos.x, camPos.y, camPos.z,
-				blockPos,
-				blockState,
-				CommonColors.BLACK
-			);
-			*///?} else {
-			//? if <26.1 {
-			((WorldRendererInvoker) context.worldRenderer()).invokeRenderHitOutline(
-			//? } else
-			//((WorldRendererInvoker) context.levelRenderer()).invokeRenderHitOutline(
-				//? if <26.1 {
-				context.matrices(),
-				//? } else
-				//context.poseStack(),
-				consumer,
-				camPos.x, camPos.y, camPos.z,
-				//? if <26.1 {
-				new BlockOutlineRenderState(
-					blockPos,
-					false,
-					false,
-					blockState.getShape(client.level, blockPos)
-				),
-				//? } else {
-				/*new BlockOutlineRenderState(
-					blockPos,
-					false,
-					false,
-					blockState.getShape(client.level, blockPos, net.minecraft.world.phys.shapes.CollisionContext.of(camera.entity()))
-				),
-				*///? }
-				CommonColors.BLACK/*? if >=1.21.11 {*/, client.getWindow().getAppropriateLineWidth()/*?}*/
-			);
-			//?}
+			renderBlockOutline(context, client, blockPos, blockState);
 		};
 
 		//? if <1.21.10 {

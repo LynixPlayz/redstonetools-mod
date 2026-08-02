@@ -89,7 +89,7 @@ dependencies {
 		implementation("fi.dy.masa.malilib:malilib-fabric-${project.property("malilib_version")}")
 		implementation("net.kr1v:malilib-api:${project.property("malilib_api_version")}")
 	}
-	annotationProcessor("net.kr1v:malilib-api-processor:1.0.0")
+	"clientAnnotationProcessor"("net.kr1v:malilib-api-processor:1.0.0")
 }
 
 configurations.all {

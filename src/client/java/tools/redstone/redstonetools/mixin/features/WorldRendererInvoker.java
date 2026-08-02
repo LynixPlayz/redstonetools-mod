@@ -15,6 +15,7 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 
 @Mixin(LevelRenderer.class)
 public interface WorldRendererInvoker {
+	//? if <26.2 {
 	@Invoker
 	//? if <=1.21.8 {
 	/*void invokeRenderHitOutline(PoseStack matrices, VertexConsumer vertexConsumer, Entity entity, double cameraX, double cameraY, double cameraZ, BlockPos pos, BlockState state, int color);
@@ -22,5 +23,6 @@ public interface WorldRendererInvoker {
 	/*void invokeRenderHitOutline(PoseStack matrices, VertexConsumer vertexConsumer, double x, double y, double z, BlockOutlineRenderState state, int color);
 	*///?} else {
 	void invokeRenderHitOutline(PoseStack matrices, VertexConsumer vertexConsumer, double x, double y, double z, BlockOutlineRenderState state, int color, float lineWidth);
+	//?}
 	//?}
 }
