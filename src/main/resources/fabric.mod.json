@@ -37,7 +37,7 @@
   "depends": {
     "fabricloader": ">=0.18.1",
     "fabric-api": "*",
-    "minecraft": ">=1.21.4 <=${minecraft_version_out}"
+    "minecraft": ">=1.21.4 <=26.2"
   },
   "recommends": {
     "worldedit": "*",
